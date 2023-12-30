@@ -47,7 +47,8 @@ namespace IlluminationApp
             CreateApp(_appName);
             CreateContainer(_containerName, _appName);
             CreateSubscription(_subscriptionName, _containerName, _appName, _eventType, _endpoint);
-        }
+			CreateSubscriptionHttp(_subscriptionName, _containerName, _appName, _eventType, _endpoint);
+		}
 
         /////////////////BROKER///////////////////////
         private void ConnectToBroker()
@@ -172,5 +173,26 @@ namespace IlluminationApp
             if (response.StatusCode != HttpStatusCode.OK)
                 MessageBox.Show("Error creating subscription", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
-    }
+		private void CreateSubscriptionHttp(string subscriptionName, string containerName, string appName, string eventType, string endpoint)
+		{
+			var sub = new Subscription(subscriptionName, containerName, eventType, endpoint);
+
+			var request = new RestRequest($"api/somiodwebservice/{appName}/{containerName}/subscriptionshttp", Method.Post);
+			request.AddObject(sub);
+
+			var response = _restClient.Execute(request);
+
+			if (EntityExistant(response))
+				return;
+
+			if (response.StatusCode == 0)
+			{
+				MessageBox.Show("It wasn't possible to connect to the API", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+
+			if (response.StatusCode != HttpStatusCode.OK)
+				MessageBox.Show("Error creating subscription", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+		}
+	}
 }
