@@ -1,4 +1,6 @@
+using SomiodWebService.Migrations;
 using System.Data.Entity;
+using System.Data.Entity.Migrations;
 using System.Web.Http;
 
 namespace SomiodWebService
@@ -11,10 +13,20 @@ namespace SomiodWebService
 
             Database.SetInitializer(new DropCreateDatabaseIfModelChanges<SomiodDbContext>());
 
-            using (SomiodDbContext context = new SomiodDbContext())
-            {
-                context.Database.Initialize(false);
-            }
-        }
+			using (var context = new SomiodDbContext())
+			{
+				if (!context.Database.Exists())
+				{
+					// Create the database if it does not exist
+					context.Database.Create();
+
+					// Apply migrations
+					var configuration = new Configuration();
+					var migrator = new DbMigrator(configuration);
+					migrator.Update();
+				}
+				context.Database.Initialize(false);
+			}
+		}
     }
 }

@@ -8,5 +8,31 @@ namespace SwitchApp
         {
             InitializeComponent();
         }
-    }
+
+		private void ButtonOff_Click(object sender, System.EventArgs e)
+		{
+
+		}
+
+		private void ButtonOn_Click(object sender, System.EventArgs e)
+		{
+
+		}
+
+
+
+
+		/////////////////API///////////////////////
+
+
+
+
+
+
+
+
+
+
+
+	}
 }
