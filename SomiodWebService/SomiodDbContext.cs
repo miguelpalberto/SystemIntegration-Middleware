@@ -10,11 +10,13 @@ namespace SomiodWebService
 		}
 
 		public DbSet<Application> Applications { get; set; }
+		public DbSet<Container> Containers { get; set; }
 
 		protected override void OnModelCreating(DbModelBuilder modelBuilder)
 		{
 			_ = modelBuilder.HasDefaultSchema("somiod");
 			_ = modelBuilder.Configurations.Add(new EntityConfigurations.ApplicationConfiguration());
+			_ = modelBuilder.Configurations.Add(new EntityConfigurations.ContainerConfiguration());
 			base.OnModelCreating(modelBuilder);
 		}
 	}
