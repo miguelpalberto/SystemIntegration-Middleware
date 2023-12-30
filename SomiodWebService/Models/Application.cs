@@ -1,16 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
 
 namespace SomiodWebService.Models
 {
-	public class Application
+	public class Application : Resource
 	{
-		[Key]
-		public int Id { get; set; }
 
-		[Required]
-		[MaxLength(255)]
-		public string Name { get; set; }
-
-		public string Creation_Dt { get; set; }
+		internal virtual ICollection<Container> Containers { get; set; }
 	}
 }
