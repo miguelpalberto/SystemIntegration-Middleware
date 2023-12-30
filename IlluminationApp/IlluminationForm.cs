@@ -7,6 +7,10 @@ using uPLibrary.Networking.M2Mqtt.Messages;
 using System.IO;
 using System.Text;
 using System.Xml.Serialization;
+using System.Net;
+using RestSharp;
+using System.Text.Json;
+using System.Reflection;
 
 
 namespace IlluminationApp
@@ -16,9 +20,19 @@ namespace IlluminationApp
 
         private static readonly string BrokerIp = Settings.Default.BrokerIp;
         private static readonly string[] Topic = { Settings.Default.Topic };
+        private static readonly string AppName = Settings.Default.AppName;
+        private static readonly string ApiBaseUri = Settings.Default.ApiBaseUri;
+        private static readonly HttpStatusCode ApiErrorManual = (HttpStatusCode)Settings.Default.ApiErrorManual;
+        private static readonly string ContainerName = Settings.Default.ContainerName;
+
+        private static readonly string SubscriptionName = Settings.Default.SubscriptionName;
+        private static readonly string EventType = Settings.Default.EventType;
+        private static readonly string Endpoint = Settings.Default.Endpoint;
+
 
         private MqttClient _mosqClient;
         private bool _illuminationState;
+        private readonly RestClient _restClient = new RestClient(ApiBaseUri);
 
 
         public IlluminationForm()
@@ -30,9 +44,12 @@ namespace IlluminationApp
         {
             ConnectToBroker();
             SubscribeToTopics();
+            CreateApp(AppName);
+            CreateContainer(ContainerName, AppName);
+            CreateSubscription(SubscriptionName, ContainerName, AppName, EventType, Endpoint);
         }
 
-
+        /////////////////BROKER///////////////////////
         private void ConnectToBroker()
         {
             _mosqClient = new MqttClient(BrokerIp);
@@ -60,25 +77,100 @@ namespace IlluminationApp
                 if (notification.EventType != "CREATE") return;
 
                 _illuminationState = notification.Content == "ON";
-                UpdateIllumination();
-            }
-        }
-        private void UpdateIllumination()
-        {
-            if (_illuminationState)
-            {
-                _illuminationState = true;
-                pictureBox1.Image = Resources.IlluminationOn;
-                return;
-            }
 
-            _illuminationState = false;
-            pictureBox1.Image = Resources.IlluminationOff;
+                if (_illuminationState)
+                {
+                    _illuminationState = true;
+                    pictureBox1.Image = Resources.IlluminationOn;
+                    return;
+                }
+
+                _illuminationState = false;
+                pictureBox1.Image = Resources.IlluminationOff;
+            }
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
             //nada
+        }
+
+        /////////////////API///////////////////////
+
+        private void CreateApp(string appName)
+        {
+            var app = new App(appName);
+
+            var request = new RestRequest("api/somiodwebservice", Method.Post);
+            request.AddObject(app);
+
+            var response = _restClient.Execute(request);
+
+            if (EntityExistant(response))
+                return;
+
+            if (response.StatusCode == 0)
+            {
+                MessageBox.Show("It wasn't possible to connect to the API", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (response.StatusCode != HttpStatusCode.OK)
+                MessageBox.Show("Error creating the application", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        private bool EntityExistant(RestResponse response)
+        {
+            if (response.StatusCode == ApiErrorManual) {
+                var error = JsonSerializer.Deserialize<Error>(response.Content ?? string.Empty);
+
+                if (error.Message.Contains("already exists"))
+                return true;
+        }
+            return false;
+        }
+
+        private void CreateContainer(string containerName, string appName)
+        {
+            var container = new Container(containerName, appName);
+
+            var request = new RestRequest($"api/somiodwebservice/{appName}", Method.Post);
+            request.AddObject(container);
+
+            var response = _restClient.Execute(request);
+
+            if (EntityExistant(response))
+                return;
+
+            if (response.StatusCode == 0)
+            {
+                MessageBox.Show("It wasn't possible to connect to the API", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (response.StatusCode != HttpStatusCode.OK)
+                MessageBox.Show("Error creating container", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private void CreateSubscription(string subscriptionName, string containerName, string appName, string eventType, string endpoint)
+        {
+            var sub = new Subscription(subscriptionName, containerName, eventType, endpoint);
+
+            var request = new RestRequest($"api/somiodwebservice/{appName}/{containerName}/subscriptions", Method.Post);
+            request.AddObject(sub);
+
+            var response = _restClient.Execute(request);
+
+            if (EntityExistant(response))
+                return;
+
+            if (response.StatusCode == 0)
+            {
+                MessageBox.Show("It wasn't possible to connect to the API", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (response.StatusCode != HttpStatusCode.OK)
+                MessageBox.Show("Error creating subscription", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

@@ -40,12 +40,89 @@ namespace IlluminationApp.Properties
 
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("light_bulb")]
+        [global::System.Configuration.DefaultSettingValueAttribute("illumination")]
         public string Topic
         {
             get
             {
                 return ((string)(this["Topic"]));
+            }
+        }
+
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("illuminationApp")]
+        public string AppName
+        {
+            get
+            {
+                return ((string)(this["AppName"]));
+            }
+        }
+
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:53568/")]
+        public string ApiBaseUri
+        {
+            get
+            {
+                return ((string)(this["ApiBaseUri"]));
+            }
+        }
+
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("422")]
+        public int ApiErrorManual
+        {
+            get
+            {
+                return ((int)(this["ApiErrorManual"]));
+            }
+        }
+
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("illumination")]
+        public string ContainerName
+        {
+            get
+            {
+                return ((string)(this["ContainerName"]));
+            }
+        }
+
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("subscription")]
+        public string SubscriptionName
+        {
+            get
+            {
+                return ((string)(this["SubscriptionName"]));
+            }
+        }
+
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("CREATE")]
+        public string EventType
+        {
+            get
+            {
+                return ((string)(this["EventType"]));
+            }
+        }
+
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("127.0.0.1")]
+        public string Endpoint
+        {
+            get
+            {
+                return ((string)(this["Endpoint"]));
             }
         }
     }
