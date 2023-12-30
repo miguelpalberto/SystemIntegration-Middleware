@@ -154,6 +154,13 @@
     <Compile Include="Models\Subscription.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SomiodDbContext.cs" />
+    <Compile Include="Validations\ValidationErrorMessage.cs" />
+    <Compile Include="Validations\Validators\ApplicationValidator.cs" />
+    <Compile Include="Validations\Validators\ContainerValidator.cs" />
+    <Compile Include="Validations\Validators\DataValidator.cs" />
+    <Compile Include="Validations\Validators\IValidator.cs" />
+    <Compile Include="Validations\ValidationState.cs" />
+    <Compile Include="Validations\Validators\SubscriptionValidator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
