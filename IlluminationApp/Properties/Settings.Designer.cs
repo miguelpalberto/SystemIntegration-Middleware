@@ -26,5 +26,27 @@ namespace IlluminationApp.Properties
                 return defaultInstance;
             }
         }
+
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("127.0.0.1")]
+        public string BrokerIp
+        {
+            get
+            {
+                return ((string)(this["BrokerIp"]));
+            }
+        }
+
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("light_bulb")]
+        public string Topic
+        {
+            get
+            {
+                return ((string)(this["Topic"]));
+            }
+        }
     }
 }

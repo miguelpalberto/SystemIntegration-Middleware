@@ -67,5 +67,46 @@ namespace IlluminationApp.Properties
                 resourceCulture = value;
             }
         }
+
+        //
+        internal static System.Drawing.Bitmap IlluminationOff
+        {
+            get
+            {
+                string imagePath = "IlluminationApp.Resources.lampsoff.png";
+
+                using (var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream(imagePath))
+                {
+                    if (stream != null)
+                    {
+                        return new System.Drawing.Bitmap(stream);
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }
+        }
+        internal static System.Drawing.Bitmap IlluminationOn
+        {
+            get
+            {
+                string imagePath = "IlluminationApp.Resources.lampson.png";
+
+                using (var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream(imagePath))
+                {
+                    if (stream != null)
+                    {
+                        return new System.Drawing.Bitmap(stream);
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }
+        }
+
     }
 }
