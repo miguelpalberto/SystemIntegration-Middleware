@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+using System.Data.Entity;
 using System.Web.Http;
-using System.Web.Routing;
 
 namespace SomiodWebService
 {
@@ -12,6 +8,13 @@ namespace SomiodWebService
         protected void Application_Start()
         {
             GlobalConfiguration.Configure(WebApiConfig.Register);
+
+            Database.SetInitializer(new DropCreateDatabaseIfModelChanges<SomiodDbContext>());
+
+            using (SomiodDbContext context = new SomiodDbContext())
+            {
+                context.Database.Initialize(false);
+            }
         }
     }
 }
