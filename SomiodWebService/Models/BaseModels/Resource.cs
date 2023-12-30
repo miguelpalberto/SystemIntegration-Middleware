@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SomiodWebService.Models
+namespace SomiodWebService.Models.BaseModels
 {
 	public abstract class Resource
 	{
