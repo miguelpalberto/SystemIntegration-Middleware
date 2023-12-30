@@ -1,7 +1,9 @@
 ﻿using SomiodWebService.Models;
+using SomiodWebService.Validations;
+using SomiodWebService.Validations.Validators;
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 
@@ -19,10 +21,10 @@ namespace SomiodWebService.Controllers
 				if (Request.Headers.Any(h => h.Key == "somiod-discover" && h.Value.Contains("application")))
 				{
 					var containerNames = context.Applications.AsNoTracking().Select(c => c.Name).ToList();
-					return Request.CreateResponse(System.Net.HttpStatusCode.OK, containerNames);
+					return Request.CreateResponse(HttpStatusCode.OK, containerNames);
 				}
 
-				return Request.CreateResponse(System.Net.HttpStatusCode.OK, context.Applications.AsNoTracking().ToList());
+				return Request.CreateResponse(HttpStatusCode.OK, context.Applications.AsNoTracking().ToList());
 			}
 		}
 
@@ -36,7 +38,7 @@ namespace SomiodWebService.Controllers
 
 				if (!queryable.Any())
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Application not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Application not found.");
 				}
 
 				var storedEntity = queryable.First();
@@ -44,11 +46,11 @@ namespace SomiodWebService.Controllers
 				if (Request.Headers.Any(h => h.Key == "somiod-discover" && h.Value.Contains("container")))
 				{
 					var containerNames = context.Containers.AsNoTracking().Where(c => c.Parent == storedEntity.Id).Select(c => c.Name).ToList();
-					return Request.CreateResponse(System.Net.HttpStatusCode.OK, containerNames);
+					return Request.CreateResponse(HttpStatusCode.OK, containerNames);
 				}
 				else
 				{
-					return Request.CreateResponse(System.Net.HttpStatusCode.OK, storedEntity);
+					return Request.CreateResponse(HttpStatusCode.OK, storedEntity);
 				}
 
 			}
@@ -59,12 +61,15 @@ namespace SomiodWebService.Controllers
 		{
 			if (application == null)
 			{
-				return Request.CreateErrorResponse(System.Net.HttpStatusCode.BadRequest, "Body is empty.");
+				return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Body is empty.");
 			}
 
-			if (!ModelState.IsValid)
+			var validator = new ApplicationValidator();
+			var validationResult = validator.Validate(application);
+
+			if (!validationResult.IsValid)
 			{
-				return Request.CreateErrorResponse(System.Net.HttpStatusCode.BadRequest, "Invalid application format.");
+				return Request.CreateErrorResponse((HttpStatusCode)422, validationResult.ErrorMessages.First().Message);
 			}
 
 			using (var context = new SomiodDbContext())
@@ -81,7 +86,7 @@ namespace SomiodWebService.Controllers
 				_ = context.Applications.Add(application);
 				_ = context.SaveChanges();
 
-				return Request.CreateResponse(System.Net.HttpStatusCode.Created, application, Configuration.Formatters.XmlFormatter);
+				return Request.CreateResponse(HttpStatusCode.Created, application, Configuration.Formatters.XmlFormatter);
 			}
 		}
 
@@ -90,12 +95,15 @@ namespace SomiodWebService.Controllers
 		{
 			if (updatedApplication == null)
 			{
-				return Request.CreateErrorResponse(System.Net.HttpStatusCode.BadRequest, "Body is empty.");
+				return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Body is empty.");
 			}
 
-			if (!ModelState.IsValid)
+			var validator = new ApplicationValidator();
+			var validationResult = validator.Validate(updatedApplication);
+
+			if (!validationResult.IsValid)
 			{
-				return Request.CreateErrorResponse(System.Net.HttpStatusCode.BadRequest, "Invalid application format.");
+				return Request.CreateErrorResponse((HttpStatusCode)422, validationResult.ErrorMessages.First().Message);
 			}
 
 			using (var context = new SomiodDbContext())
@@ -104,14 +112,14 @@ namespace SomiodWebService.Controllers
 
 				if (!queryable.Any())
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Application not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Application not found.");
 				}
 
 				var storedEntity = queryable.First();
 				storedEntity.Name = updatedApplication.Name;
 				_ = context.SaveChanges();
 
-				return Request.CreateResponse(System.Net.HttpStatusCode.OK, storedEntity);
+				return Request.CreateResponse(HttpStatusCode.OK, storedEntity);
 			}
 		}
 
@@ -124,14 +132,14 @@ namespace SomiodWebService.Controllers
 
 				if (!queryable.Any())
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Application not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Application not found.");
 				}
 
 				var storedEntity = queryable.First();
 				_ = context.Applications.Remove(storedEntity);
 				_ = context.SaveChanges();
 
-				return Request.CreateResponse(System.Net.HttpStatusCode.OK);
+				return Request.CreateResponse(HttpStatusCode.OK);
 			}
 		}
 
@@ -144,12 +152,12 @@ namespace SomiodWebService.Controllers
 
 				if (!queryable.Any())
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Application not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Application not found.");
 				}
 
 				var applicationEntity = queryable.First();
 				var containers = context.Containers.AsNoTracking().Where(c => c.Parent == applicationEntity.Id).ToList();
-				return Request.CreateResponse(System.Net.HttpStatusCode.OK, containers);
+				return Request.CreateResponse(HttpStatusCode.OK, containers);
 			}
 		}
 
@@ -163,7 +171,7 @@ namespace SomiodWebService.Controllers
 
 				if (!queryable.Any())
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Application not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Application not found.");
 				}
 
 				var applicationEntity = queryable.First();
@@ -171,22 +179,22 @@ namespace SomiodWebService.Controllers
 
 				if (containerEntity == null)
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Container not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Container not found.");
 				}
 
 				if (Request.Headers.Any(h => h.Key == "somiod-discover" && h.Value.Contains("subscription")))
 				{
 					var subscriptionNames = context.Subscriptions.AsNoTracking().Where(s => s.Parent == containerEntity.Id).Select(s => s.Name).ToList();
-					return Request.CreateResponse(System.Net.HttpStatusCode.OK, subscriptionNames);
+					return Request.CreateResponse(HttpStatusCode.OK, subscriptionNames);
 				}
 
 				if (Request.Headers.Any(h => h.Key == "somiod-discover" && h.Value.Contains("data")))
 				{
 					var dataNames = context.Data.AsNoTracking().Where(d => d.Parent == containerEntity.Id).Select(d => d.Name).ToList();
-					return Request.CreateResponse(System.Net.HttpStatusCode.OK, dataNames);
+					return Request.CreateResponse(HttpStatusCode.OK, dataNames);
 				}
 
-				return Request.CreateResponse(System.Net.HttpStatusCode.OK, containerEntity);
+				return Request.CreateResponse(HttpStatusCode.OK, containerEntity);
 			}
 		}
 
@@ -195,12 +203,15 @@ namespace SomiodWebService.Controllers
 		{
 			if (container == null)
 			{
-				return Request.CreateErrorResponse(System.Net.HttpStatusCode.BadRequest, "Body is empty.");
+				return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Body is empty.");
 			}
 
-			if (!ModelState.IsValid)
+			var validator = new ContainerValidator();
+			var validationResult = validator.Validate(container);
+
+			if (!validationResult.IsValid)
 			{
-				return Request.CreateErrorResponse(System.Net.HttpStatusCode.BadRequest, "Invalid container format.");
+				return Request.CreateErrorResponse((HttpStatusCode)422, validationResult.ErrorMessages.First().Message);
 			}
 
 			using (var context = new SomiodDbContext())
@@ -210,7 +221,7 @@ namespace SomiodWebService.Controllers
 
 				if (!queryable.Any())
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Application not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Application not found.");
 				}
 
 				var applicationEntity = queryable.First();
@@ -228,7 +239,7 @@ namespace SomiodWebService.Controllers
 				_ = context.Containers.Add(container);
 				_ = context.SaveChanges();
 
-				return Request.CreateResponse(System.Net.HttpStatusCode.Created, container);
+				return Request.CreateResponse(HttpStatusCode.Created, container);
 			}
 		}
 
@@ -237,12 +248,15 @@ namespace SomiodWebService.Controllers
 		{
 			if (updatedContainer == null)
 			{
-				return Request.CreateErrorResponse(System.Net.HttpStatusCode.BadRequest, "Body is empty.");
+				return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Body is empty.");
 			}
 
-			if (!ModelState.IsValid)
+			var validator = new ContainerValidator();
+			var validationResult = validator.Validate(updatedContainer);
+
+			if (!validationResult.IsValid)
 			{
-				return Request.CreateErrorResponse(System.Net.HttpStatusCode.BadRequest, "Invalid container format.");
+				return Request.CreateErrorResponse((HttpStatusCode)422, validationResult.ErrorMessages.First().Message);
 			}
 
 			using (var context = new SomiodDbContext())
@@ -251,7 +265,7 @@ namespace SomiodWebService.Controllers
 
 				if (!queryable.Any())
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Application not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Application not found.");
 				}
 
 				var applicationEntity = queryable.First();
@@ -259,13 +273,13 @@ namespace SomiodWebService.Controllers
 
 				if (containerEntity == null)
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Container not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Container not found.");
 				}
 
 				containerEntity.Name = updatedContainer.Name;
 				_ = context.SaveChanges();
 
-				return Request.CreateResponse(System.Net.HttpStatusCode.OK, containerEntity);
+				return Request.CreateResponse(HttpStatusCode.OK, containerEntity);
 			}
 		}
 
@@ -278,7 +292,7 @@ namespace SomiodWebService.Controllers
 
 				if (!queryable.Any())
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Application not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Application not found.");
 				}
 
 				var applicationEntity = queryable.First();
@@ -286,13 +300,13 @@ namespace SomiodWebService.Controllers
 
 				if (containerEntity == null)
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Container not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Container not found.");
 				}
 
 				_ = context.Containers.Remove(containerEntity);
 				_ = context.SaveChanges();
 
-				return Request.CreateResponse(System.Net.HttpStatusCode.OK);
+				return Request.CreateResponse(HttpStatusCode.OK);
 			}
 		}
 
@@ -305,7 +319,7 @@ namespace SomiodWebService.Controllers
 
 				if (!queryable.Any())
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Application not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Application not found.");
 				}
 
 				var applicationEntity = queryable.First();
@@ -313,11 +327,11 @@ namespace SomiodWebService.Controllers
 
 				if (containerEntity == null)
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Container not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Container not found.");
 				}
 
 				var subscriptions = context.Subscriptions.AsNoTracking().Where(s => s.Parent == containerEntity.Id).ToList();
-				return Request.CreateResponse(System.Net.HttpStatusCode.OK, subscriptions);
+				return Request.CreateResponse(HttpStatusCode.OK, subscriptions);
 			}
 		}
 
@@ -330,7 +344,7 @@ namespace SomiodWebService.Controllers
 
 				if (!queryable.Any())
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Application not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Application not found.");
 				}
 
 				var applicationEntity = queryable.First();
@@ -338,14 +352,14 @@ namespace SomiodWebService.Controllers
 
 				if (containerEntity == null)
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Container not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Container not found.");
 				}
 
 				var subscriptionEntity = context.Subscriptions.AsNoTracking().Where(s => s.Parent == containerEntity.Id && s.Name == subscription).FirstOrDefault();
 
 				return subscriptionEntity == null
-					? Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Subscription not found.")
-					: Request.CreateResponse(System.Net.HttpStatusCode.OK, subscriptionEntity);
+					? Request.CreateErrorResponse(HttpStatusCode.NotFound, "Subscription not found.")
+					: Request.CreateResponse(HttpStatusCode.OK, subscriptionEntity);
 			}
 		}
 
@@ -354,19 +368,15 @@ namespace SomiodWebService.Controllers
 		{
 			if (subscription == null)
 			{
-				return Request.CreateErrorResponse(System.Net.HttpStatusCode.BadRequest, "Body is empty.");
+				return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Body is empty.");
 			}
 
-			if (!ModelState.IsValid)
-			{
-				return Request.CreateErrorResponse(System.Net.HttpStatusCode.BadRequest, "Invalid subscription format.");
-			}
+			var validator = new SubscriptionValidator();
+			var validationResult = validator.Validate(subscription);
 
-			var availableEvents = new List<string> { "1", "2", "12" };
-
-			if (string.IsNullOrEmpty(subscription.Event) || !availableEvents.Contains(subscription.Event))
+			if (!validationResult.IsValid)
 			{
-				return Request.CreateErrorResponse(System.Net.HttpStatusCode.BadRequest, "Invalid subscription event. Use 1 for creation, 2 for deletion and 12 for both");
+				return Request.CreateErrorResponse((HttpStatusCode)422, validationResult.ErrorMessages.First().Message);
 			}
 
 			using (var context = new SomiodDbContext())
@@ -376,7 +386,7 @@ namespace SomiodWebService.Controllers
 
 				if (!queryable.Any())
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Application not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Application not found.");
 				}
 
 				var applicationEntity = queryable.First();
@@ -384,7 +394,7 @@ namespace SomiodWebService.Controllers
 
 				if (containerEntity == null)
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Container not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Container not found.");
 				}
 
 				var uniqueName = subscription.Name.ToLowerInvariant();
@@ -400,7 +410,7 @@ namespace SomiodWebService.Controllers
 				_ = context.Subscriptions.Add(subscription);
 				_ = context.SaveChanges();
 
-				return Request.CreateResponse(System.Net.HttpStatusCode.Created, subscription);
+				return Request.CreateResponse(HttpStatusCode.Created, subscription);
 			}
 		}
 
@@ -413,13 +423,13 @@ namespace SomiodWebService.Controllers
 
 				if (storedEntity == null)
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Subscription not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Subscription not found.");
 				}
 
 				_ = context.Subscriptions.Remove(storedEntity);
 				_ = context.SaveChanges();
 
-				return Request.CreateResponse(System.Net.HttpStatusCode.OK);
+				return Request.CreateResponse(HttpStatusCode.OK);
 			}
 		}
 
@@ -432,7 +442,7 @@ namespace SomiodWebService.Controllers
 
 				if (!queryable.Any())
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Application not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Application not found.");
 				}
 
 				var applicationEntity = queryable.First();
@@ -440,11 +450,11 @@ namespace SomiodWebService.Controllers
 
 				if (containerEntity == null)
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Container not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Container not found.");
 				}
 
 				var data = context.Data.AsNoTracking().Where(d => d.Parent == containerEntity.Id).ToList();
-				return Request.CreateResponse(System.Net.HttpStatusCode.OK, data);
+				return Request.CreateResponse(HttpStatusCode.OK, data);
 			}
 		}
 
@@ -457,7 +467,7 @@ namespace SomiodWebService.Controllers
 
 				if (!queryable.Any())
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Application not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Application not found.");
 				}
 
 				var applicationEntity = queryable.First();
@@ -465,14 +475,14 @@ namespace SomiodWebService.Controllers
 
 				if (containerEntity == null)
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Container not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Container not found.");
 				}
 
 				var dataEntity = context.Data.AsNoTracking().Where(d => d.Parent == containerEntity.Id && d.Name == data).FirstOrDefault();
 
 				return dataEntity == null
-					? Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Data not found.")
-					: Request.CreateResponse(System.Net.HttpStatusCode.OK, dataEntity);
+					? Request.CreateErrorResponse(HttpStatusCode.NotFound, "Data not found.")
+					: Request.CreateResponse(HttpStatusCode.OK, dataEntity);
 			}
 		}
 
@@ -481,19 +491,15 @@ namespace SomiodWebService.Controllers
 		{
 			if (data == null)
 			{
-				return Request.CreateErrorResponse(System.Net.HttpStatusCode.BadRequest, "Body is empty.");
+				return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Body is empty.");
 			}
 
-			if (!ModelState.IsValid)
-			{
-				return Request.CreateErrorResponse(System.Net.HttpStatusCode.BadRequest, "Invalid data format.");
-			}
+			var validator = new DataValidator();
+			var validationResult = validator.Validate(data);
 
-			var availableContent = new List<string> { "on", "off" };
-
-			if (string.IsNullOrEmpty(data.Content) || !availableContent.Contains(data.Content))
+			if (!validationResult.IsValid)
 			{
-				return Request.CreateErrorResponse(System.Net.HttpStatusCode.BadRequest, "Invalid data content. Must be on or off");
+				return Request.CreateErrorResponse((HttpStatusCode)422, validationResult.ErrorMessages.First().Message);
 			}
 
 			using (var context = new SomiodDbContext())
@@ -502,7 +508,7 @@ namespace SomiodWebService.Controllers
 
 				if (!queryable.Any())
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Application not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Application not found.");
 				}
 
 				var applicationEntity = queryable.First();
@@ -510,7 +516,7 @@ namespace SomiodWebService.Controllers
 
 				if (containerEntity == null)
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Container not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Container not found.");
 				}
 
 				var uniqueName = data.Name.ToLowerInvariant();
@@ -528,7 +534,7 @@ namespace SomiodWebService.Controllers
 
 				//TODO: send event to subscribers
 
-				return Request.CreateResponse(System.Net.HttpStatusCode.Created, data);
+				return Request.CreateResponse(HttpStatusCode.Created, data);
 			}
 		}
 
@@ -541,14 +547,14 @@ namespace SomiodWebService.Controllers
 
 				if (storedEntity == null)
 				{
-					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Data not found.");
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Data not found.");
 				}
 
 				_ = context.Data.Remove(storedEntity);
 				_ = context.SaveChanges();
 
 				//TODO: send event to subscribers
-				return Request.CreateResponse(System.Net.HttpStatusCode.OK);
+				return Request.CreateResponse(HttpStatusCode.OK);
 			}
 		}
 	}
