@@ -11,11 +11,14 @@ namespace SomiodWebService
 			// Web API routes
 			config.MapHttpAttributeRoutes();
 
-			config.Routes.MapHttpRoute(
+			_ = config.Routes.MapHttpRoute(
 				name: "Somiod",
 				routeTemplate: "api/{controller}/{id}",
 				defaults: new { id = RouteParameter.Optional }
 			);
+
+			//remove json formatter
+			_ = GlobalConfiguration.Configuration.Formatters.Remove(GlobalConfiguration.Configuration.Formatters.JsonFormatter);
 
 			var xml = config.Formatters.XmlFormatter;
 			xml.UseXmlSerializer = true;
