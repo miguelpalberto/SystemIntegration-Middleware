@@ -137,10 +137,46 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\SomiodController.cs" />
+    <Compile Include="EntityConfigurations\DataConfiguration.cs" />
+    <Compile Include="EntityConfigurations\SubscriptionConfiguration.cs" />
+    <Compile Include="EntityConfigurations\ContainerConfiguration.cs" />
+    <Compile Include="EntityConfigurations\ApplicationConfiguration.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202312301307578_InitialMigration.cs" />
+    <Compile Include="Migrations\202312301307578_InitialMigration.designer.cs">
+      <DependentUpon>202312301307578_InitialMigration.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202312301549240_ContainerTable.cs" />
+    <Compile Include="Migrations\202312301549240_ContainerTable.designer.cs">
+      <DependentUpon>202312301549240_ContainerTable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202312301806500_SubscriptionTable.cs" />
+    <Compile Include="Migrations\202312301806500_SubscriptionTable.designer.cs">
+      <DependentUpon>202312301806500_SubscriptionTable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202312301934048_DataTable.cs" />
+    <Compile Include="Migrations\202312301934048_DataTable.designer.cs">
+      <DependentUpon>202312301934048_DataTable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\Application.cs" />
+    <Compile Include="Models\BaseModels\ChildResource.cs" />
+    <Compile Include="Models\BaseModels\Resource.cs" />
+    <Compile Include="Models\Container.cs" />
+    <Compile Include="Models\Data.cs" />
+    <Compile Include="Models\Subscription.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SomiodDbContext.cs" />
+    <Compile Include="Validations\ValidationErrorMessage.cs" />
+    <Compile Include="Validations\Validators\ApplicationValidator.cs" />
+    <Compile Include="Validations\Validators\ContainerValidator.cs" />
+    <Compile Include="Validations\Validators\DataValidator.cs" />
+    <Compile Include="Validations\Validators\IValidator.cs" />
+    <Compile Include="Validations\ValidationState.cs" />
+    <Compile Include="Validations\Validators\SubscriptionValidator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -153,6 +189,20 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\202312301307578_InitialMigration.resx">
+      <DependentUpon>202312301307578_InitialMigration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202312301549240_ContainerTable.resx">
+      <DependentUpon>202312301549240_ContainerTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202312301806500_SubscriptionTable.resx">
+      <DependentUpon>202312301806500_SubscriptionTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202312301934048_DataTable.resx">
+      <DependentUpon>202312301934048_DataTable.cs</DependentUpon>
+    </EmbeddedResource>
     <Folder Include="Controllers\" />
     <Folder Include="Models\" />
   </ItemGroup>

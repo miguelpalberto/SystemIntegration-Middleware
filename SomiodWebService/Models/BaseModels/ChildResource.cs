@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SomiodWebService.Models
+namespace SomiodWebService.Models.BaseModels
 {
 	/// <summary>
 	/// Abstract class for resources that have a parent resource. <see cref="TParent"/> is the generic type of the parent resource.
@@ -13,6 +13,6 @@ namespace SomiodWebService.Models
 		public int Parent { get; set; }
 
 		[ForeignKey(nameof(Parent))]
-		public TParent ParentResource { get; set; }
+		internal TParent ParentResource { get; set; }
 	}
 }
