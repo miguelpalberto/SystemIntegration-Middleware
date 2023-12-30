@@ -10,6 +10,7 @@ namespace SomiodWebService.Controllers
 	public class SomiodController : ApiController
 	{
 
+		//discovers application names through the somiod-discover header
 		[HttpGet, Route("api/somiod")]
 		public HttpResponseMessage GetApplications()
 		{
@@ -25,6 +26,7 @@ namespace SomiodWebService.Controllers
 			}
 		}
 
+		//discovers container names through the somiod-discover header
 		[HttpGet, Route("api/somiod/{application}")]
 		public HttpResponseMessage GetApplication(string application)
 		{
@@ -151,6 +153,7 @@ namespace SomiodWebService.Controllers
 			}
 		}
 
+		//discovers subscription or data names through the somiod-discover header
 		[HttpGet, Route("api/somiod/{application}/{container}")]
 		public HttpResponseMessage GetContainer(string application, string container)
 		{
@@ -179,7 +182,8 @@ namespace SomiodWebService.Controllers
 
 				if (Request.Headers.Any(h => h.Key == "somiod-discover" && h.Value.Contains("data")))
 				{
-					//todo: implement data discovery
+					var dataNames = context.Data.AsNoTracking().Where(d => d.Parent == containerEntity.Id).Select(d => d.Name).ToList();
+					return Request.CreateResponse(System.Net.HttpStatusCode.OK, dataNames);
 				}
 
 				return Request.CreateResponse(System.Net.HttpStatusCode.OK, containerEntity);
@@ -317,7 +321,7 @@ namespace SomiodWebService.Controllers
 			}
 		}
 
-		[HttpGet, Route("api/somiod/{application}/{container}/{subscription}")]
+		[HttpGet, Route("api/somiod/{application}/{container}/subscriptions/{subscription}")]
 		public HttpResponseMessage GetSubscription(string application, string container, string subscription)
 		{
 			using (var context = new SomiodDbContext())
@@ -400,7 +404,7 @@ namespace SomiodWebService.Controllers
 			}
 		}
 
-		[HttpPost, Route("api/somiod/{application}/{container}/subscriptions/{subscription}")]
+		[HttpDelete, Route("api/somiod/{application}/{container}/subscriptions/{subscription}")]
 		public HttpResponseMessage DeleteSubscription(string subscription)
 		{
 			using (var context = new SomiodDbContext())
@@ -419,5 +423,134 @@ namespace SomiodWebService.Controllers
 			}
 		}
 
+		[HttpGet, Route("api/somiod/{application}/{container}/data")]
+		public HttpResponseMessage GetData(string application, string container)
+		{
+			using (var context = new SomiodDbContext())
+			{
+				var queryable = context.Applications.AsNoTracking().Where(a => a.Name == application).AsQueryable();
+
+				if (!queryable.Any())
+				{
+					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Application not found.");
+				}
+
+				var applicationEntity = queryable.First();
+				var containerEntity = context.Containers.AsNoTracking().Where(c => c.Parent == applicationEntity.Id && c.Name == container).FirstOrDefault();
+
+				if (containerEntity == null)
+				{
+					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Container not found.");
+				}
+
+				var data = context.Data.AsNoTracking().Where(d => d.Parent == containerEntity.Id).ToList();
+				return Request.CreateResponse(System.Net.HttpStatusCode.OK, data);
+			}
+		}
+
+		[HttpGet, Route("api/somiod/{application}/{container}/data/{data}")]
+		public HttpResponseMessage GetData(string application, string container, string data)
+		{
+			using (var context = new SomiodDbContext())
+			{
+				var queryable = context.Applications.AsNoTracking().Where(a => a.Name == application).AsQueryable();
+
+				if (!queryable.Any())
+				{
+					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Application not found.");
+				}
+
+				var applicationEntity = queryable.First();
+				var containerEntity = context.Containers.AsNoTracking().Where(c => c.Parent == applicationEntity.Id && c.Name == container).FirstOrDefault();
+
+				if (containerEntity == null)
+				{
+					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Container not found.");
+				}
+
+				var dataEntity = context.Data.AsNoTracking().Where(d => d.Parent == containerEntity.Id && d.Name == data).FirstOrDefault();
+
+				return dataEntity == null
+					? Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Data not found.")
+					: Request.CreateResponse(System.Net.HttpStatusCode.OK, dataEntity);
+			}
+		}
+
+		[HttpPost, Route("api/somiod/{application}/{container}/data")]
+		public HttpResponseMessage PostData(string application, string container, [FromBody] Data data)
+		{
+			if (data == null)
+			{
+				return Request.CreateErrorResponse(System.Net.HttpStatusCode.BadRequest, "Body is empty.");
+			}
+
+			if (!ModelState.IsValid)
+			{
+				return Request.CreateErrorResponse(System.Net.HttpStatusCode.BadRequest, "Invalid data format.");
+			}
+
+			var availableContent = new List<string> { "on", "off" };
+
+			if (string.IsNullOrEmpty(data.Content) || !availableContent.Contains(data.Content))
+			{
+				return Request.CreateErrorResponse(System.Net.HttpStatusCode.BadRequest, "Invalid data content. Must be on or off");
+			}
+
+			using (var context = new SomiodDbContext())
+			{
+				var queryable = context.Applications.AsNoTracking().Where(a => a.Name == application).AsQueryable();
+
+				if (!queryable.Any())
+				{
+					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Application not found.");
+				}
+
+				var applicationEntity = queryable.First();
+				var containerEntity = context.Containers.AsNoTracking().Where(c => c.Parent == applicationEntity.Id && c.Name == container).FirstOrDefault();
+
+				if (containerEntity == null)
+				{
+					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Container not found.");
+				}
+
+				var uniqueName = data.Name.ToLowerInvariant();
+
+				if (context.Data.Any(a => a.Name == uniqueName && a.Parent == containerEntity.Id))
+				{
+					uniqueName = $"{uniqueName}-{Guid.NewGuid()}";
+				}
+
+				data.Name = uniqueName;
+				data.Parent = containerEntity.Id;
+				data.CreatedDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+				_ = context.Data.Add(data);
+				_ = context.SaveChanges();
+
+				//TODO: send event to subscribers
+
+				return Request.CreateResponse(System.Net.HttpStatusCode.Created, data);
+			}
+		}
+
+		[HttpDelete, Route("api/somiod/{application}/{container}/data/{data}")]
+		public HttpResponseMessage DeleteData(string data)
+		{
+			using (var context = new SomiodDbContext())
+			{
+				var storedEntity = context.Data.Where(d => d.Name == data).FirstOrDefault();
+
+				if (storedEntity == null)
+				{
+					return Request.CreateErrorResponse(System.Net.HttpStatusCode.NotFound, "Data not found.");
+				}
+
+				_ = context.Data.Remove(storedEntity);
+				_ = context.SaveChanges();
+
+				//TODO: send event to subscribers
+				return Request.CreateResponse(System.Net.HttpStatusCode.OK);
+			}
+		}
 	}
+
 }

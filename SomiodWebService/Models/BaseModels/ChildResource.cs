@@ -13,6 +13,6 @@ namespace SomiodWebService.Models.BaseModels
 		public int Parent { get; set; }
 
 		[ForeignKey(nameof(Parent))]
-		public TParent ParentResource { get; set; }
+		internal TParent ParentResource { get; set; }
 	}
 }

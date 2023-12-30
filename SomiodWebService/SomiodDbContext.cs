@@ -12,6 +12,7 @@ namespace SomiodWebService
 		public DbSet<Application> Applications { get; set; }
 		public DbSet<Container> Containers { get; set; }
 		public DbSet<Subscription> Subscriptions { get; set; }
+		public DbSet<Data> Data { get; set; }
 
 		protected override void OnModelCreating(DbModelBuilder modelBuilder)
 		{
@@ -19,6 +20,7 @@ namespace SomiodWebService
 			_ = modelBuilder.Configurations.Add(new EntityConfigurations.ApplicationConfiguration());
 			_ = modelBuilder.Configurations.Add(new EntityConfigurations.ContainerConfiguration());
 			_ = modelBuilder.Configurations.Add(new EntityConfigurations.SubscriptionConfiguration());
+			_ = modelBuilder.Configurations.Add(new EntityConfigurations.DataConfiguration());
 			base.OnModelCreating(modelBuilder);
 		}
 	}
