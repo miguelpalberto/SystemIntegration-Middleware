@@ -10,7 +10,7 @@ using System.Xml.Serialization;
 using System.Net;
 using RestSharp;
 using System.Text.Json;
-using System.Reflection;
+//using System.Reflection;
 
 
 namespace IlluminationApp
@@ -18,21 +18,21 @@ namespace IlluminationApp
     public partial class IlluminationForm : Form
     {
 
-        private static readonly string BrokerIp = Settings.Default.BrokerIp;
-        private static readonly string[] Topic = { Settings.Default.Topic };
-        private static readonly string AppName = Settings.Default.AppName;
-        private static readonly string ApiBaseUri = Settings.Default.ApiBaseUri;
-        private static readonly HttpStatusCode ApiErrorManual = (HttpStatusCode)Settings.Default.ApiErrorManual;
-        private static readonly string ContainerName = Settings.Default.ContainerName;
+        private static readonly string _brokerIp = Settings.Default.BrokerIp;
+        private static readonly string[] _topic = { Settings.Default.Topic };
+        private static readonly string _appName = Settings.Default.AppName;
+        private static readonly string _apiBaseUri = Settings.Default.ApiBaseUri;
+        private static readonly HttpStatusCode _apiErrorManual = (HttpStatusCode)Settings.Default.ApiErrorManual;
+        private static readonly string _containerName = Settings.Default.ContainerName;
 
-        private static readonly string SubscriptionName = Settings.Default.SubscriptionName;
-        private static readonly string EventType = Settings.Default.EventType;
-        private static readonly string Endpoint = Settings.Default.Endpoint;
+        private static readonly string _subscriptionName = Settings.Default.SubscriptionName;
+        private static readonly string _eventType = Settings.Default.EventType;
+        private static readonly string _endpoint = Settings.Default.Endpoint;
 
 
         private MqttClient _mosqClient;
         private bool _illuminationState;
-        private readonly RestClient _restClient = new RestClient(ApiBaseUri);
+        private readonly RestClient _restClient = new RestClient(_apiBaseUri);
 
 
         public IlluminationForm()
@@ -44,15 +44,15 @@ namespace IlluminationApp
         {
             ConnectToBroker();
             SubscribeToTopics();
-            CreateApp(AppName);
-            CreateContainer(ContainerName, AppName);
-            CreateSubscription(SubscriptionName, ContainerName, AppName, EventType, Endpoint);
+            CreateApp(_appName);
+            CreateContainer(_containerName, _appName);
+            CreateSubscription(_subscriptionName, _containerName, _appName, _eventType, _endpoint);
         }
 
         /////////////////BROKER///////////////////////
         private void ConnectToBroker()
         {
-            _mosqClient = new MqttClient(BrokerIp);
+            _mosqClient = new MqttClient(_brokerIp);
             _mosqClient.Connect(Guid.NewGuid().ToString());
 
             if (!_mosqClient.IsConnected)
@@ -64,11 +64,11 @@ namespace IlluminationApp
 
         private void SubscribeToTopics()
         {
-            _mosqClient.MqttMsgPublishReceived += client_MqttMsgPublishReceived;
+            _mosqClient.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
             byte[] qosLevels = { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE };
-            _mosqClient.Subscribe(Topic, qosLevels);
+            _mosqClient.Subscribe(_topic, qosLevels);
         }
-        private void client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs args)
+        private void Client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs args)
         {
             string messageString = Encoding.UTF8.GetString(args.Message);
             using (TextReader reader = new StringReader(messageString))
@@ -81,16 +81,16 @@ namespace IlluminationApp
                 if (_illuminationState)
                 {
                     _illuminationState = true;
-                    pictureBox1.Image = Resources.IlluminationOn;
+                    pictureBox1.Image = Resources.lampson;
                     return;
                 }
 
                 _illuminationState = false;
-                pictureBox1.Image = Resources.IlluminationOff;
+                pictureBox1.Image = Resources.lampsoff;
             }
         }
 
-        private void pictureBox1_Click(object sender, EventArgs e)
+        private void PictureBox1_Click(object sender, EventArgs e)
         {
             //nada
         }
@@ -120,7 +120,7 @@ namespace IlluminationApp
         }
         private bool EntityExistant(RestResponse response)
         {
-            if (response.StatusCode == ApiErrorManual) {
+            if (response.StatusCode == _apiErrorManual) {
                 var error = JsonSerializer.Deserialize<Error>(response.Content ?? string.Empty);
 
                 if (error.Message.Contains("already exists"))
