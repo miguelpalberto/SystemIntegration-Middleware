@@ -34,6 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -47,6 +48,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\App.cs" />
+    <Compile Include="Models\BaseModels\ChildResource.cs" />
+    <Compile Include="Models\BaseModels\Resource.cs" />
     <Compile Include="Models\Container.cs" />
     <Compile Include="Models\Data.cs" />
     <Compile Include="Models\Error.cs" />

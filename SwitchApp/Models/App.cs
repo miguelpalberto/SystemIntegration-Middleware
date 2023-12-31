@@ -15,6 +15,9 @@ namespace SwitchApp.Models
 		[XmlElement("CreationDate")]
 		public DateTime CreationDate { get; set; }
 
+		public App()
+		{
+		}
 		public App(string name)
 		{
 			Name = name;
