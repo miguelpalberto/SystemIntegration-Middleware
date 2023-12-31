@@ -50,6 +50,9 @@ namespace IlluminationApp
 			CreateSubscriptionHttp(_subscriptionName, _containerName, _appName, _eventType, _endpoint);
 		}
 
+
+
+
         /////////////////BROKER///////////////////////
         private void ConnectToBroker()
         {
@@ -95,6 +98,8 @@ namespace IlluminationApp
         {
             //nada
         }
+
+
 
         /////////////////API///////////////////////
 

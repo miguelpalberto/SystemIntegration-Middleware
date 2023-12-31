@@ -77,7 +77,8 @@
             this.Name = "SwitchForm";
             this.Text = "Form1";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            this.ResumeLayout(false);
+			this.Shown += new System.EventHandler(this.FormSwitch_Shown);
+			this.ResumeLayout(false);
 
         }
 
