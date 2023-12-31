@@ -1,4 +1,6 @@
+using SomiodWebService.Migrations;
 using System.Data.Entity;
+using System.Data.Entity.Migrations;
 using System.Web.Http;
 
 namespace SomiodWebService
