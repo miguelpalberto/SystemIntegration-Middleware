@@ -107,7 +107,7 @@ namespace IlluminationApp
         {
             var app = new App(appName);
 
-            var request = new RestRequest("api/somiodwebservice", Method.Post);
+            var request = new RestRequest("api/somiod", Method.Post);
             request.AddObject(app);
 
             var response = _restClient.Execute(request);
@@ -139,7 +139,7 @@ namespace IlluminationApp
         {
             var container = new Container(containerName, appName);
 
-            var request = new RestRequest($"api/somiodwebservice/{appName}", Method.Post);
+            var request = new RestRequest($"api/somiod/{appName}", Method.Post);
             request.AddObject(container);
 
             var response = _restClient.Execute(request);
@@ -161,7 +161,7 @@ namespace IlluminationApp
         {
             var sub = new Subscription(subscriptionName, containerName, eventType, endpoint);
 
-            var request = new RestRequest($"api/somiodwebservice/{appName}/{containerName}/subscriptions", Method.Post);
+            var request = new RestRequest($"api/somiod/{appName}/{containerName}/subscriptions", Method.Post);
             request.AddObject(sub);
 
             var response = _restClient.Execute(request);
@@ -182,7 +182,7 @@ namespace IlluminationApp
 		{
 			var sub = new Subscription(subscriptionName, containerName, eventType, endpoint);
 
-			var request = new RestRequest($"api/somiodwebservice/{appName}/{containerName}/subscriptionshttp", Method.Post);
+			var request = new RestRequest($"api/somiod/{appName}/{containerName}/subscriptionshttp", Method.Post);
 			request.AddObject(sub);
 
 			var response = _restClient.Execute(request);

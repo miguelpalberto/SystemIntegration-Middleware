@@ -50,7 +50,7 @@ namespace SwitchApp
 		{
 			var mod = new Data(content);
 
-			var request = new RestRequest($"api/somiodwebservice/{appName}/{moduleToSendData}/data", Method.Post);
+			var request = new RestRequest($"api/somiod/{appName}/{moduleToSendData}/data", Method.Post);
 			request.AddObject(mod);
 
 			var response = _restClient.Execute(request);
@@ -69,7 +69,7 @@ namespace SwitchApp
 		{
 			var mod = new Container(containerName, appName);
 
-			var request = new RestRequest($"api/somiodwebservice/{appName}", Method.Post);
+			var request = new RestRequest($"api/somiod/{appName}", Method.Post);
 			request.AddObject(mod);
 
 			var response = _restClient.Execute(request);
