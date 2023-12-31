@@ -24,11 +24,6 @@ namespace SomiodWebService.Validations
 				state.ErrorMessages.Add(new ValidationErrorMessage("Name cannot be longer than 50 characters"));
 			}
 
-			if (obj.Parent <= 0)
-			{
-				state.ErrorMessages.Add(new ValidationErrorMessage("Parent is required"));
-			}
-
 			return state;
 		}
 	}

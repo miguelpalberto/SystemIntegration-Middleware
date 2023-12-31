@@ -88,7 +88,7 @@ namespace IlluminationApp.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("CREATE")]
+        [global::System.Configuration.DefaultSettingValueAttribute("12")]
         public string EventType {
             get {
                 return ((string)(this["EventType"]));
@@ -97,7 +97,7 @@ namespace IlluminationApp.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("127.0.0.1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("mqtt://127.0.0.1")]
         public string Endpoint {
             get {
                 return ((string)(this["Endpoint"]));

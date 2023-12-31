@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 namespace SwitchApp.Models
 {
 	[XmlRoot("Container")]
-	public class Container : App
+	public class Container : Application
 	{
 		[XmlElement("Parent")]
 		public string Parent { get; set; }

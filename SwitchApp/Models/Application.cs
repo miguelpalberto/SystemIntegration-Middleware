@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 namespace SwitchApp.Models
 {
 	[XmlRoot("Application")]
-	public class App
+	public class Application
 	{
 		[XmlElement("Id")]
 		public int Id { get; set; }
@@ -15,10 +15,10 @@ namespace SwitchApp.Models
 		[XmlElement("CreationDate")]
 		public DateTime CreationDate { get; set; }
 
-		public App()
+		public Application()
 		{
 		}
-		public App(string name)
+		public Application(string name)
 		{
 			Name = name;
 		}

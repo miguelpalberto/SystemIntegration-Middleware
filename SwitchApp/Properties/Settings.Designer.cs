@@ -52,19 +52,19 @@ namespace SwitchApp.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("illumination")]
-        public string ContainerName {
+        [global::System.Configuration.DefaultSettingValueAttribute("422")]
+        public int ApiErrorManual {
             get {
-                return ((string)(this["ContainerName"]));
+                return ((int)(this["ApiErrorManual"]));
             }
         }
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("422")]
-        public int ApiErrorManual {
+        [global::System.Configuration.DefaultSettingValueAttribute("switch")]
+        public string OwnAppName {
             get {
-                return ((int)(this["ApiErrorManual"]));
+                return ((string)(this["OwnAppName"]));
             }
         }
     }
