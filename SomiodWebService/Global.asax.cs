@@ -1,6 +1,4 @@
-using SomiodWebService.Migrations;
 using System.Data.Entity;
-using System.Data.Entity.Migrations;
 using System.Web.Http;
 
 namespace SomiodWebService
@@ -16,7 +14,15 @@ namespace SomiodWebService
 
 			using (var context = new SomiodDbContext())
 			{
-				context.Database.Initialize(false);
+				try
+				{
+					context.Database.Initialize(false);
+				}
+				catch (System.Exception)
+				{
+					_ = context.Database.Delete();
+					context.Database.Initialize(false);
+				}
 			}
 		}
 	}
