@@ -8,6 +8,9 @@ namespace SwitchApp.Models
 	{
 		[XmlElement("Parent")]
 		public string Parent { get; set; }
+		public Container() : base()
+		{
+		}
 
 		public Container(string name, string parent) : base(name)
 		{
