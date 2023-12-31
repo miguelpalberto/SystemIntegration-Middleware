@@ -24,10 +24,10 @@
       <Value Profile="(Default)">subscription</Value>
     </Setting>
     <Setting Name="EventType" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">CREATE</Value>
+      <Value Profile="(Default)">12</Value>
     </Setting>
     <Setting Name="Endpoint" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">127.0.0.1</Value>
+      <Value Profile="(Default)">mqtt://127.0.0.1</Value>
     </Setting>
   </Settings>
 </SettingsFile>

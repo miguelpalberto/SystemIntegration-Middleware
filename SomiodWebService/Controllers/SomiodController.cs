@@ -1,7 +1,9 @@
 ﻿using SomiodWebService.Models;
+using SomiodWebService.Services;
 using SomiodWebService.Validations;
 using SomiodWebService.Validations.Validators;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -243,7 +245,7 @@ namespace SomiodWebService.Controllers
 			}
 		}
 
-		[HttpPut, Route("api/somiod/{application}/{container}")]
+		[HttpPut, Route("api/somiod/{application}/containers/{container}")]
 		public HttpResponseMessage PutContainer(string application, string container, [FromBody] Container updatedContainer)
 		{
 			if (updatedContainer == null)
@@ -283,7 +285,7 @@ namespace SomiodWebService.Controllers
 			}
 		}
 
-		[HttpDelete, Route("api/somiod/{application}/{container}")]
+		[HttpDelete, Route("api/somiod/{application}/containers/{container}")]
 		public HttpResponseMessage DeleteContainer(string application, string container)
 		{
 			using (var context = new SomiodDbContext())
@@ -415,10 +417,25 @@ namespace SomiodWebService.Controllers
 		}
 
 		[HttpDelete, Route("api/somiod/{application}/{container}/subscriptions/{subscription}")]
-		public HttpResponseMessage DeleteSubscription(string subscription)
+		public HttpResponseMessage DeleteSubscription(string application, string container, string subscription)
 		{
 			using (var context = new SomiodDbContext())
 			{
+				var queryable = context.Applications.AsNoTracking().Where(a => a.Name == application).AsQueryable();
+
+				if (!queryable.Any())
+				{
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Application not found.");
+				}
+
+				var applicationEntity = queryable.First();
+				var containerEntity = context.Containers.AsNoTracking().Where(c => c.Parent == applicationEntity.Id && c.Name == container).FirstOrDefault();
+
+				if (containerEntity == null)
+				{
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Container not found.");
+				}
+
 				var storedEntity = context.Subscriptions.Where(s => s.Name == subscription).FirstOrDefault();
 
 				if (storedEntity == null)
@@ -532,17 +549,32 @@ namespace SomiodWebService.Controllers
 				_ = context.Data.Add(data);
 				_ = context.SaveChanges();
 
-				//TODO: send event to subscribers
+				SendNotificationToSubscriptions(context, containerEntity.Id, containerEntity.Name, data.Content, "1"); //1 = creation
 
 				return Request.CreateResponse(HttpStatusCode.Created, data);
 			}
 		}
 
 		[HttpDelete, Route("api/somiod/{application}/{container}/data/{data}")]
-		public HttpResponseMessage DeleteData(string data)
+		public HttpResponseMessage DeleteData(string application, string container, string data)
 		{
 			using (var context = new SomiodDbContext())
 			{
+				var queryable = context.Applications.AsNoTracking().Where(a => a.Name == application).AsQueryable();
+
+				if (!queryable.Any())
+				{
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Application not found.");
+				}
+
+				var applicationEntity = queryable.First();
+				var containerEntity = context.Containers.AsNoTracking().Where(c => c.Parent == applicationEntity.Id && c.Name == container).FirstOrDefault();
+
+				if (containerEntity == null)
+				{
+					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Container not found.");
+				}
+
 				var storedEntity = context.Data.Where(d => d.Name == data).FirstOrDefault();
 
 				if (storedEntity == null)
@@ -553,10 +585,51 @@ namespace SomiodWebService.Controllers
 				_ = context.Data.Remove(storedEntity);
 				_ = context.SaveChanges();
 
-				//TODO: send event to subscribers
+				SendNotificationToSubscriptions(context, containerEntity.Id, containerEntity.Name, storedEntity.Content, "2"); //2 = deletion
+
 				return Request.CreateResponse(HttpStatusCode.OK);
 			}
 		}
-	}
 
+		private void SendNotificationToSubscriptions(SomiodDbContext context, int containerId, string topic, string content, string eventType)
+		{
+			var subscriptions = context.Subscriptions
+				.AsNoTracking()
+				.Where(s => s.Parent == containerId)
+				.Where(s => s.Event == eventType || s.Event == "12") //eventType = 1 (creation) or 2 (deletion) or 12 (both)
+				.ToList();
+
+			if (!subscriptions.Any())
+			{
+				return;
+			}
+
+			var notification = new Notification
+			{
+				Content = content,
+				EventType = eventType
+			};
+
+			foreach (var subscription in subscriptions)
+			{
+				try
+				{
+					if (subscription.Endpoint.StartsWith("http"))
+					{
+						RestSharpService.FireNotification(subscription.Endpoint, topic, notification);
+					}
+
+					if (subscription.Endpoint.StartsWith("mqtt"))
+					{
+						MqttService.FireNotification(subscription.Endpoint, topic, notification);
+					}
+				}
+				catch (Exception ex)
+				{
+					Debug.WriteLine(ex.Message);
+					continue;
+				}
+			}
+		}
+	}
 }
