@@ -230,7 +230,7 @@ namespace SomiodWebService.Controllers
 
 				var uniqueName = container.Name.ToLowerInvariant();
 
-				if (context.Containers.Any(a => a.Name == uniqueName && a.Parent == applicationEntity.Id))
+				if (context.Containers.Any(a => a.Name == uniqueName))
 				{
 					uniqueName = $"{uniqueName}-{Guid.NewGuid()}";
 				}
@@ -401,7 +401,7 @@ namespace SomiodWebService.Controllers
 
 				var uniqueName = subscription.Name.ToLowerInvariant();
 
-				if (context.Subscriptions.Any(a => a.Name == uniqueName && a.Parent == containerEntity.Id))
+				if (context.Subscriptions.Any(a => a.Name == uniqueName))
 				{
 					uniqueName = $"{uniqueName}-{Guid.NewGuid()}";
 				}
@@ -538,7 +538,7 @@ namespace SomiodWebService.Controllers
 
 				var uniqueName = data.Name.ToLowerInvariant();
 
-				if (context.Data.Any(a => a.Name == uniqueName && a.Parent == containerEntity.Id))
+				if (context.Data.Any(a => a.Name == uniqueName))
 				{
 					uniqueName = $"{uniqueName}-{Guid.NewGuid()}";
 				}
