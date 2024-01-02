@@ -13,7 +13,7 @@ namespace SomiodWebService.Services
 
 		public static void FireNotification(string endpoint, string topic, Notification notification)
 		{
-			var client = new MqttClient("127.0.0.1");
+			var client = new MqttClient(endpoint);
 
 			_ = client.Connect(_clientGuid.ToString());
 
@@ -24,9 +24,12 @@ namespace SomiodWebService.Services
 
 			_ = client.Publish(topic, Encoding.UTF8.GetBytes(XMLConversionService.ConvertToXMLDocument(notification).OuterXml));
 
-			//dont immediately disconnect, wait for the message to be sent
-			_ = Task.Delay(2000);
-			client.Disconnect();
+			if (client.IsConnected)
+			{
+				// Wait for the message to be sent before disconnecting
+				Task.Delay(1000).Wait();
+				client.Disconnect();
+			}
 		}
 	}
 }

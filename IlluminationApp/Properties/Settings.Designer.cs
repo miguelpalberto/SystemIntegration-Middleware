@@ -43,7 +43,7 @@ namespace IlluminationApp.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("illumination")]
+        [global::System.Configuration.DefaultSettingValueAttribute("light_bulb")]
         public string Topic {
             get {
                 return ((string)(this["Topic"]));
@@ -61,16 +61,7 @@ namespace IlluminationApp.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("422")]
-        public int ApiErrorManual {
-            get {
-                return ((int)(this["ApiErrorManual"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("illumination")]
+        [global::System.Configuration.DefaultSettingValueAttribute("light_bulb")]
         public string ContainerName {
             get {
                 return ((string)(this["ContainerName"]));
@@ -79,7 +70,7 @@ namespace IlluminationApp.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("subscription")]
+        [global::System.Configuration.DefaultSettingValueAttribute("sub")]
         public string SubscriptionName {
             get {
                 return ((string)(this["SubscriptionName"]));
@@ -97,7 +88,7 @@ namespace IlluminationApp.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("mqtt://127.0.0.1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("127.0.0.1")]
         public string Endpoint {
             get {
                 return ((string)(this["Endpoint"]));

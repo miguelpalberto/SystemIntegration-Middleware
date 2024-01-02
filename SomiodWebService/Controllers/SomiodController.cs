@@ -549,7 +549,7 @@ namespace SomiodWebService.Controllers
 				_ = context.Data.Add(data);
 				_ = context.SaveChanges();
 
-				SendNotificationToSubscriptions(context, containerEntity.Id, containerEntity.Name, data.Content, "1"); //1 = creation
+				SendNotificationToSubscriptions(context, containerEntity.Id, containerEntity.Name, data, "1"); //1 = creation
 
 				return Request.CreateResponse(HttpStatusCode.Created, data);
 			}
@@ -585,13 +585,13 @@ namespace SomiodWebService.Controllers
 				_ = context.Data.Remove(storedEntity);
 				_ = context.SaveChanges();
 
-				SendNotificationToSubscriptions(context, containerEntity.Id, containerEntity.Name, storedEntity.Content, "2"); //2 = deletion
+				SendNotificationToSubscriptions(context, containerEntity.Id, containerEntity.Name, storedEntity, "2"); //2 = deletion
 
 				return Request.CreateResponse(HttpStatusCode.OK);
 			}
 		}
 
-		private void SendNotificationToSubscriptions(SomiodDbContext context, int containerId, string topic, string content, string eventType)
+		private void SendNotificationToSubscriptions(SomiodDbContext context, int containerId, string topic, Data data, string eventType)
 		{
 			var subscriptions = context.Subscriptions
 				.AsNoTracking()
@@ -604,11 +604,7 @@ namespace SomiodWebService.Controllers
 				return;
 			}
 
-			var notification = new Notification
-			{
-				Content = content,
-				EventType = eventType
-			};
+			var notification = new Notification(eventType, data);
 
 			foreach (var subscription in subscriptions)
 			{
@@ -618,8 +614,7 @@ namespace SomiodWebService.Controllers
 					{
 						RestSharpService.FireNotification(subscription.Endpoint, topic, notification);
 					}
-
-					if (subscription.Endpoint.StartsWith("mqtt"))
+					else
 					{
 						MqttService.FireNotification(subscription.Endpoint, topic, notification);
 					}
