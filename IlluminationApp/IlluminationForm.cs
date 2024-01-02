@@ -20,7 +20,6 @@ namespace IlluminationApp
 		private static readonly string[] _topic = { Settings.Default.Topic };
 		private static readonly string _appName = Settings.Default.AppName;
 		private static readonly string _apiBaseUri = Settings.Default.ApiBaseUri;
-		private static readonly HttpStatusCode _apiErrorManual = (HttpStatusCode)Settings.Default.ApiErrorManual;
 		private static readonly string _containerName = Settings.Default.ContainerName;
 
 		private static readonly string _subscriptionName = Settings.Default.SubscriptionName;
@@ -36,7 +35,7 @@ namespace IlluminationApp
 			InitializeComponent();
 		}
 
-		private void IlluminationForm_Load(object sender, System.EventArgs e)
+		private void IlluminationForm_Load(object sender, EventArgs e)
 		{
 			ConnectToBroker();
 			SubscribeToTopics();
@@ -70,7 +69,7 @@ namespace IlluminationApp
 			{
 				var notification = (Notification)new XmlSerializer(typeof(Notification)).Deserialize(reader);
 
-				_illuminationState = notification.Content == "on";
+				_illuminationState = notification.Data.Content == "on";
 
 				if (_illuminationState)
 				{
@@ -93,7 +92,7 @@ namespace IlluminationApp
 
 		private void CreateApp(string appName)
 		{
-			var app = new App(appName);
+			var app = new Models.Application(appName);
 
 			var request = new RestRequest("api/somiod", Method.Post);
 			_ = request.AddObject(app);
@@ -114,7 +113,7 @@ namespace IlluminationApp
 
 		private void CreateContainer(string containerName, string appName)
 		{
-			var container = new Container(containerName, appName);
+			var container = new Container(containerName);
 
 			var request = new RestRequest($"api/somiod/{appName}", Method.Post);
 			_ = request.AddObject(container);
@@ -135,7 +134,7 @@ namespace IlluminationApp
 
 		private void CreateSubscription(string subscriptionName, string containerName, string appName, string eventType, string endpoint)
 		{
-			var sub = new Subscription(subscriptionName, containerName, eventType, endpoint);
+			var sub = new Subscription(subscriptionName, eventType, endpoint);
 
 			var request = new RestRequest($"api/somiod/{appName}/{containerName}/subscriptions", Method.Post);
 			_ = request.AddObject(sub);

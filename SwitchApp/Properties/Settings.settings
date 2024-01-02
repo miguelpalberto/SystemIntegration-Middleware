@@ -9,10 +9,7 @@
       <Value Profile="(Default)">illumination</Value>
     </Setting>
     <Setting Name="ContainerToSendData" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">illumination</Value>
-    </Setting>
-    <Setting Name="ApiErrorManual" Type="System.Int32" Scope="Application">
-      <Value Profile="(Default)">422</Value>
+      <Value Profile="(Default)">light_bulb</Value>
     </Setting>
     <Setting Name="OwnAppName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">switch</Value>

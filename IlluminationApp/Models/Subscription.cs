@@ -1,10 +1,11 @@
 ﻿
+using IlluminationApp.BaseModels;
 using System.Xml.Serialization;
 
 namespace IlluminationApp.Models
 {
 	[XmlRoot("Subscription")]
-	public class Subscription : Container
+	public class Subscription : ChildResource<Container>
 	{
 		[XmlElement("Event")]
 		public string Event { get; set; }
@@ -12,7 +13,7 @@ namespace IlluminationApp.Models
 		[XmlElement("Endpoint")]
 		public string Endpoint { get; set; }
 
-		public Subscription(string name, string parent, string eventType, string endpoint) : base(name, parent)
+		public Subscription(string name, string eventType, string endpoint) : base(name)
 		{
 			Event = eventType;
 			Endpoint = endpoint;

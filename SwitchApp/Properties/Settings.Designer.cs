@@ -43,19 +43,10 @@ namespace SwitchApp.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("illumination")]
+        [global::System.Configuration.DefaultSettingValueAttribute("light_bulb")]
         public string ContainerToSendData {
             get {
                 return ((string)(this["ContainerToSendData"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("422")]
-        public int ApiErrorManual {
-            get {
-                return ((int)(this["ApiErrorManual"]));
             }
         }
         

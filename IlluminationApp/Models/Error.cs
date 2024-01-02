@@ -1,9 +1,12 @@
 ﻿
+using System.Xml.Serialization;
 
 namespace IlluminationApp.Models
 {
-    public class Error
-    {
-        public string Message { get; set; }
-    }
+	[XmlRoot("Error")]
+	public class Error
+	{
+		[XmlElement("Message")]
+		public string Message { get; set; }
+	}
 }

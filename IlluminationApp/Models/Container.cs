@@ -1,17 +1,17 @@
-﻿using System.Xml.Serialization;
+﻿using IlluminationApp.BaseModels;
+using System.Xml.Serialization;
 
 namespace IlluminationApp.Models
 {
-    [XmlRoot("Container")]
-    public class Container : App
-    {
-        [XmlElement("Parent")]
-        public string Parent { get; set; }
+	[XmlRoot("Container")]
+	public class Container : ChildResource<Application>
+	{
+		public Container()
+		{
+		}
 
-
-        public Container(string name, string parent) : base(name)
-        {
-            Parent = parent;
-        }
-    }
+		public Container(string name) : base(name)
+		{
+		}
+	}
 }
