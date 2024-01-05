@@ -78,5 +78,115 @@ namespace SwitchApp
 				_ = MessageBox.Show("Error creating appication", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
+
+		private RestResponse GetData()
+		{
+			var request = new RestRequest($"api/somiod/{_appName}/{_containerToSendData}/data", Method.Get);
+
+			var response = _restClient.Execute(request);
+
+			if (response.StatusCode == 0)
+			{
+				_ = MessageBox.Show("It wasn't possible to connect to the API", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return null;
+			}
+
+			if (response.StatusCode != HttpStatusCode.OK)
+			{
+				_ = MessageBox.Show("Error getting data", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return null;
+			}
+			return response;
+
+		}
+
+		private RestResponse DeleteData(string selectedData)
+		{
+			var request = new RestRequest($"api/somiod/{_appName}/{_containerToSendData}/data", Method.Delete);
+
+			var response = _restClient.Execute(request);
+
+			if (response.StatusCode == 0)
+			{
+				MessageBox.Show("It wasn't possible to connect to the API", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return null;
+			}
+
+			if (response.StatusCode != HttpStatusCode.OK)
+			{
+				MessageBox.Show("Error deleting data", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return null;
+			}
+			return response;
+		}
+
+		private void GetAllDataButton_Click(object sender, EventArgs e)
+		{
+			var response = GetData();
+			if (response != null)
+			{
+				var data = response.Content;
+				listBoxData.Items.Add(data);
+			}
+		}
+
+		private void ListBoxData_SelectedIndexChanged(object sender, EventArgs e)
+		{
+
+		}
+
+		private void DeleteDataButton_Click(object sender, EventArgs e)
+		{
+			var selectedData = listBoxData.SelectedItem as string; //todo rever se e string
+
+			if (string.IsNullOrEmpty(selectedData))
+			{
+				MessageBox.Show("Please select an item to delete", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+
+			var response = DeleteData(selectedData);
+			if (response != null)
+			{
+				listBoxData.Items.Remove(selectedData);
+			}
+
+		}
+
+		private void GetByIdButton_Click(object sender, EventArgs e)
+		{
+			var id = idTextBox.Text;
+
+			if (string.IsNullOrEmpty(id))
+			{
+				MessageBox.Show("Please enter an id", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+
+			var request = new RestRequest($"api/somiod/{_appName}/{_containerToSendData}/data/{id}", Method.Get);
+
+			var response = _restClient.Execute(request);
+
+			if (response.StatusCode == 0)
+			{
+				MessageBox.Show("It wasn't possible to connect to the API", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+
+			if (response.StatusCode != HttpStatusCode.OK)
+			{
+				MessageBox.Show("Error getting data", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+
+			var data = response.Content;
+			listBoxData.Items.Add(data);
+		}
+
+		private void IdTextBox_TextChanged(object sender, EventArgs e)
+		{
+
+		}
+
 	}
 }
