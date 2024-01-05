@@ -102,9 +102,9 @@ namespace SwitchApp
 
 		}
 
-		private RestResponse DeleteDataById(int idSelectedData)
+		private RestResponse DeleteDataByName(string nameSelectedData)
 		{
-			var request = new RestRequest($"api/somiod/{_appName}/{_containerToSendData}/data/id/{idSelectedData}", Method.Delete);
+			var request = new RestRequest($"api/somiod/{_appName}/{_containerToSendData}/data/{nameSelectedData}", Method.Delete);
 
 			var response = _restClient.Execute(request);
 
@@ -121,7 +121,6 @@ namespace SwitchApp
 			}
 			return response;
 		}
-
 
 		/////////////////FORM///////////////////////
 
@@ -146,7 +145,7 @@ namespace SwitchApp
 				// Display Id and Content pairs in the listBoxData
 				foreach (var pair in idContentPairs)
 				{
-					listBoxData.Items.Add($"{pair.Id} - {pair.Content} --- ( {pair.Name} )");
+					listBoxData.Items.Add($"{pair.Id} - {pair.Content} - {pair.Name}");
 				}
 			}
 		}
@@ -191,7 +190,7 @@ namespace SwitchApp
 
 				if (idContentPair != null)
 				{
-					listBoxData.Items.Add($"{idContentPair.Id} - {idContentPair.Content} --- ( {idContentPair.Name} )");
+					listBoxData.Items.Add($"{idContentPair.Id} - {idContentPair.Content} - {idContentPair.Name}");
 				}
 				else
 				{
@@ -230,15 +229,22 @@ namespace SwitchApp
 				return;
 			}
 
-			var selectedIdString = idContentParts[0];
+			//var selectedIdString = idContentParts[0];
+			var selectedNameString = idContentParts[2];
 
-			if (!int.TryParse(selectedIdString, out int selectedId))
+			//if (!int.TryParse(selectedIdString, out int selectedId))
+			//{
+			//	MessageBox.Show("Invalid Id format", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			//	return;
+			//}
+			if (selectedNameString == null)
 			{
-				MessageBox.Show("Invalid Id format", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show("Error retrieving unique name", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
 			}
 
-			var response = DeleteDataById(selectedId);
+			//var response = DeleteDataById(selectedId);
+			var response = DeleteDataByName(selectedNameString);
 			if (response != null)
 			{
 				listBoxData.Items.Remove(selectedData);
