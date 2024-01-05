@@ -50,7 +50,7 @@
             this.ClientSize = new System.Drawing.Size(800, 517);
             this.Controls.Add(this.pictureBox1);
             this.Name = "IlluminationForm";
-            this.Text = "Form1";
+            this.Text = "LightBulbs";
             this.Load += new System.EventHandler(this.IlluminationForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);

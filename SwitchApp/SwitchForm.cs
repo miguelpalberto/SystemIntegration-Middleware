@@ -137,7 +137,8 @@ namespace SwitchApp
 					.Select(data => new
 					{
 						Id = data.Element("Id")?.Value,
-						Content = data.Element("Content")?.Value
+						Content = data.Element("Content")?.Value,
+						Name = data.Element("Name")?.Value
 					})
 					.Where(pair => pair.Content == "on" || pair.Content == "off")
 					.ToList();
@@ -145,7 +146,7 @@ namespace SwitchApp
 				// Display Id and Content pairs in the listBoxData
 				foreach (var pair in idContentPairs)
 				{
-					listBoxData.Items.Add($"{pair.Id} - {pair.Content}");
+					listBoxData.Items.Add($"{pair.Id} - {pair.Content} --- ( {pair.Name} )");
 				}
 			}
 		}
@@ -183,13 +184,14 @@ namespace SwitchApp
 					.Select(data => new
 					{
 						Id = data.Element("Id")?.Value,
-						Content = data.Element("Content")?.Value
+						Content = data.Element("Content")?.Value,
+						Name = data.Element("Name")?.Value
 					})
 					.SingleOrDefault();
 
 				if (idContentPair != null)
 				{
-					listBoxData.Items.Add($"{idContentPair.Id} - {idContentPair.Content}");
+					listBoxData.Items.Add($"{idContentPair.Id} - {idContentPair.Content} --- ( {idContentPair.Name} )");
 				}
 				else
 				{

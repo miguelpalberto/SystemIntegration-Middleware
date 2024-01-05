@@ -97,14 +97,13 @@
             this.idTextBox.Name = "idTextBox";
             this.idTextBox.Size = new System.Drawing.Size(65, 20);
             this.idTextBox.TabIndex = 5;
-            //this.idTextBox.TextChanged += new System.EventHandler(this.IdTextBox_TextChanged);
             // 
             // listBoxData
             // 
             this.listBoxData.FormattingEnabled = true;
             this.listBoxData.Location = new System.Drawing.Point(609, 175);
             this.listBoxData.Name = "listBoxData";
-            this.listBoxData.Size = new System.Drawing.Size(203, 173);
+            this.listBoxData.Size = new System.Drawing.Size(361, 173);
             this.listBoxData.TabIndex = 6;
             this.listBoxData.SelectedIndexChanged += new System.EventHandler(this.ListBoxData_SelectedIndexChanged);
             // 
@@ -122,7 +121,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(871, 540);
+            this.ClientSize = new System.Drawing.Size(1009, 540);
             this.Controls.Add(this.deleteDataButton);
             this.Controls.Add(this.listBoxData);
             this.Controls.Add(this.idTextBox);
@@ -132,7 +131,7 @@
             this.Controls.Add(this.buttonOn);
             this.Controls.Add(this.pictureBox1);
             this.Name = "SwitchForm";
-            this.Text = "Form1";
+            this.Text = "Switch";
             this.Shown += new System.EventHandler(this.FormSwitch_Shown);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
