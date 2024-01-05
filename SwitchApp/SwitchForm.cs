@@ -2,9 +2,11 @@
 using SwitchApp.Models;
 using SwitchApp.Properties;
 using System;
+using System.Linq;
 using System.Net;
 //using System.Reflection;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace SwitchApp
 {
@@ -100,9 +102,9 @@ namespace SwitchApp
 
 		}
 
-		private RestResponse DeleteData(string selectedData)
+		private RestResponse DeleteDataById(int idSelectedData)
 		{
-			var request = new RestRequest($"api/somiod/{_appName}/{_containerToSendData}/data", Method.Delete);
+			var request = new RestRequest($"api/somiod/{_appName}/{_containerToSendData}/data/id/{idSelectedData}", Method.Delete);
 
 			var response = _restClient.Execute(request);
 
@@ -120,37 +122,32 @@ namespace SwitchApp
 			return response;
 		}
 
+
+		/////////////////FORM///////////////////////
+
 		private void GetAllDataButton_Click(object sender, EventArgs e)
 		{
 			var response = GetData();
 			if (response != null)
 			{
-				var data = response.Content;
-				listBoxData.Items.Add(data);
+				var xmlDoc = XDocument.Parse(response.Content);
+
+				// Select Id and Content values
+				var idContentPairs = xmlDoc.Descendants("Data")
+					.Select(data => new
+					{
+						Id = data.Element("Id")?.Value,
+						Content = data.Element("Content")?.Value
+					})
+					.Where(pair => pair.Content == "on" || pair.Content == "off")
+					.ToList();
+
+				// Display Id and Content pairs in the listBoxData
+				foreach (var pair in idContentPairs)
+				{
+					listBoxData.Items.Add($"{pair.Id} - {pair.Content}");
+				}
 			}
-		}
-
-		private void ListBoxData_SelectedIndexChanged(object sender, EventArgs e)
-		{
-
-		}
-
-		private void DeleteDataButton_Click(object sender, EventArgs e)
-		{
-			var selectedData = listBoxData.SelectedItem as string; //todo rever se e string
-
-			if (string.IsNullOrEmpty(selectedData))
-			{
-				MessageBox.Show("Please select an item to delete", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				return;
-			}
-
-			var response = DeleteData(selectedData);
-			if (response != null)
-			{
-				listBoxData.Items.Remove(selectedData);
-			}
-
 		}
 
 		private void GetByIdButton_Click(object sender, EventArgs e)
@@ -162,8 +159,13 @@ namespace SwitchApp
 				MessageBox.Show("Please enter an id", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
 			}
+			if (!int.TryParse(id, out _))
+			{
+				MessageBox.Show("Please enter a valid numeric id", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
 
-			var request = new RestRequest($"api/somiod/{_appName}/{_containerToSendData}/data/{id}", Method.Get);
+			var request = new RestRequest($"api/somiod/{_appName}/{_containerToSendData}/data/id/{id}", Method.Get);
 
 			var response = _restClient.Execute(request);
 
@@ -173,15 +175,74 @@ namespace SwitchApp
 				return;
 			}
 
-			if (response.StatusCode != HttpStatusCode.OK)
+			try
 			{
-				MessageBox.Show("Error getting data", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				var xmlDoc = XDocument.Parse(response.Content);
+
+				var idContentPair = xmlDoc.Descendants("Data")
+					.Select(data => new
+					{
+						Id = data.Element("Id")?.Value,
+						Content = data.Element("Content")?.Value
+					})
+					.SingleOrDefault();
+
+				if (idContentPair != null)
+				{
+					listBoxData.Items.Add($"{idContentPair.Id} - {idContentPair.Content}");
+				}
+				else
+				{
+					MessageBox.Show($"No data found for ID {id}", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+				}
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show($"Error getting data", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}	
+			return;
+
+		}
+
+		private void ListBoxData_SelectedIndexChanged(object sender, EventArgs e)
+		{
+
+		}
+
+		private void DeleteDataButton_Click(object sender, EventArgs e)
+		{
+			var selectedData = listBoxData.SelectedItem as string;
+
+			if (string.IsNullOrEmpty(selectedData))
+			{
+				MessageBox.Show("Please select an item to delete", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
 			}
 
-			var data = response.Content;
-			listBoxData.Items.Add(data);
+			// Split the selected item to extract the Id
+			var idContentParts = selectedData.Split(new[] { " - " }, StringSplitOptions.RemoveEmptyEntries);
+
+			if (idContentParts.Length < 2)
+			{
+				MessageBox.Show("Selected item format is invalid", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+
+			var selectedIdString = idContentParts[0];
+
+			if (!int.TryParse(selectedIdString, out int selectedId))
+			{
+				MessageBox.Show("Invalid Id format", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+
+			var response = DeleteDataById(selectedId);
+			if (response != null)
+			{
+				listBoxData.Items.Remove(selectedData);
+			}
 		}
+
 
 		private void IdTextBox_TextChanged(object sender, EventArgs e)
 		{
