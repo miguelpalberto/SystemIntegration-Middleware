@@ -619,41 +619,6 @@ namespace SomiodWebService.Controllers
 			}
 		}
 
-		[HttpDelete, Route("api/somiod/{application}/{container}/data/id/{data}")]
-		public HttpResponseMessage DeleteDataById(string application, string container, int data)
-		{
-			using (var context = new SomiodDbContext())
-			{
-				var queryable = context.Applications.AsNoTracking().Where(a => a.Name == application).AsQueryable();
-
-				if (!queryable.Any())
-				{
-					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Application not found.");
-				}
-
-				var applicationEntity = queryable.First();
-				var containerEntity = context.Containers.AsNoTracking().Where(c => c.Parent == applicationEntity.Id && c.Name == container).FirstOrDefault();
-
-				if (containerEntity == null)
-				{
-					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Container not found.");
-				}
-
-				var storedEntity = context.Data.Where(d => d.Id == data).FirstOrDefault();
-
-				if (storedEntity == null)
-				{
-					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Data not found.");
-				}
-
-				_ = context.Data.Remove(storedEntity);
-				_ = context.SaveChanges();
-
-				//SendNotificationToSubscriptions(context, containerEntity.Id, containerEntity.Name, storedEntity, "2"); //2 = deletion
-
-				return Request.CreateResponse(HttpStatusCode.OK);
-			}
-		}
 
 		private void SendNotificationToSubscriptions(SomiodDbContext context, int containerId, string topic, Data data, string eventType)
 		{
