@@ -2,6 +2,7 @@
 using IlluminationApp.Properties;
 using RestSharp;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -83,11 +84,6 @@ namespace IlluminationApp
 			}
 		}
 
-		private void PictureBox1_Click(object sender, EventArgs e)
-		{
-			//nada
-		}
-
 		/////////////////API///////////////////////
 
 		private void CreateApp(string appName)
@@ -102,6 +98,12 @@ namespace IlluminationApp
 			if (response.StatusCode == 0)
 			{
 				_ = MessageBox.Show("It wasn't possible to connect to the API", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+
+			if (response.StatusCode == HttpStatusCode.Conflict)
+			{
+				Debug.WriteLine("Application already exists");
 				return;
 			}
 
@@ -123,6 +125,12 @@ namespace IlluminationApp
 			if (response.StatusCode == 0)
 			{
 				_ = MessageBox.Show("It wasn't possible to connect to the API", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+
+			if (response.StatusCode == HttpStatusCode.Conflict)
+			{
+				Debug.WriteLine("Container already exists");
 				return;
 			}
 

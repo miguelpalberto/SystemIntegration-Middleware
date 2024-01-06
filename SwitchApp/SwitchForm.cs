@@ -2,8 +2,10 @@
 using SwitchApp.Models;
 using SwitchApp.Properties;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
+
 //using System.Reflection;
 using System.Windows.Forms;
 using System.Xml.Linq;
@@ -75,6 +77,12 @@ namespace SwitchApp
 				return;
 			}
 
+			if (response.StatusCode == HttpStatusCode.Conflict)
+			{
+				Debug.WriteLine("Application already exists");
+				return;
+			}
+
 			if (response.StatusCode != HttpStatusCode.Created)
 			{
 				_ = MessageBox.Show("Error creating appication", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -83,6 +91,7 @@ namespace SwitchApp
 
 		private RestResponse GetData()
 		{
+			listBoxData.Items.Clear();
 			var request = new RestRequest($"api/somiod/{_appName}/{_containerToSendData}/data", Method.Get);
 
 			var response = _restClient.Execute(request);
@@ -110,13 +119,13 @@ namespace SwitchApp
 
 			if (response.StatusCode == 0)
 			{
-				MessageBox.Show("It wasn't possible to connect to the API", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				_ = MessageBox.Show("It wasn't possible to connect to the API", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return null;
 			}
 
 			if (response.StatusCode != HttpStatusCode.OK)
 			{
-				MessageBox.Show("Error deleting data", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				_ = MessageBox.Show("Error deleting data", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return null;
 			}
 			return response;
@@ -145,33 +154,76 @@ namespace SwitchApp
 				// Display Id and Content pairs in the listBoxData
 				foreach (var pair in idContentPairs)
 				{
-					listBoxData.Items.Add($"{pair.Id} - {pair.Content} - {pair.Name}");
+					_ = listBoxData.Items.Add($"{pair.Id} - {pair.Content} - {pair.Name}");
 				}
 			}
 		}
 
-		private void GetByIdButton_Click(object sender, EventArgs e)
+		private void DeleteDataButton_Click(object sender, EventArgs e)
 		{
-			var id = idTextBox.Text;
+			var selectedData = listBoxData.SelectedItem as string;
 
-			if (string.IsNullOrEmpty(id))
+			if (string.IsNullOrEmpty(selectedData))
 			{
-				MessageBox.Show("Please enter an id", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				return;
-			}
-			if (!int.TryParse(id, out _))
-			{
-				MessageBox.Show("Please enter a valid numeric id", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				_ = MessageBox.Show("Please select an item to delete", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
 			}
 
-			var request = new RestRequest($"api/somiod/{_appName}/{_containerToSendData}/data/id/{id}", Method.Get);
+			// Split the selected item to extract the Id
+			var idContentParts = selectedData.Split(new[] { " - " }, StringSplitOptions.RemoveEmptyEntries);
+
+			if (idContentParts.Length < 2)
+			{
+				_ = MessageBox.Show("Selected item format is invalid", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+
+			//var selectedIdString = idContentParts[0];
+			var selectedNameString = idContentParts[2];
+
+			//if (!int.TryParse(selectedIdString, out int selectedId))
+			//{
+			//	MessageBox.Show("Invalid Id format", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			//	return;
+			//}
+			if (selectedNameString == null)
+			{
+				_ = MessageBox.Show("Error retrieving unique name", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+
+			//var response = DeleteDataById(selectedId);
+			var response = DeleteDataByName(selectedNameString);
+			if (response != null)
+			{
+				listBoxData.Items.Remove(selectedData);
+			}
+		}
+
+		private void GetByNameButton_Click(object sender, EventArgs e)
+		{
+			listBoxData.Items.Clear();
+			var name = nameTextBox.Text;
+
+			if (string.IsNullOrEmpty(name))
+			{
+				_ = MessageBox.Show("Please enter a name", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+
+			var request = new RestRequest($"api/somiod/{_appName}/{_containerToSendData}/data/{name}", Method.Get);
 
 			var response = _restClient.Execute(request);
 
+			if (response.StatusCode == HttpStatusCode.NotFound)
+			{
+				_ = MessageBox.Show($"No data found for name {name}", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+				return;
+			}
+
 			if (response.StatusCode == 0)
 			{
-				MessageBox.Show("It wasn't possible to connect to the API", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				_ = MessageBox.Show("It wasn't possible to connect to the API", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
 			}
 
@@ -190,72 +242,18 @@ namespace SwitchApp
 
 				if (idContentPair != null)
 				{
-					listBoxData.Items.Add($"{idContentPair.Id} - {idContentPair.Content} - {idContentPair.Name}");
+					_ = listBoxData.Items.Add($"{idContentPair.Id} - {idContentPair.Content} - {idContentPair.Name}");
 				}
 				else
 				{
-					MessageBox.Show($"No data found for ID {id}", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+					_ = MessageBox.Show($"No data found for ID {name}", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
 				}
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
-				MessageBox.Show($"Error getting data", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-			}	
+				_ = MessageBox.Show($"Error getting data", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
 			return;
-
 		}
-
-		private void ListBoxData_SelectedIndexChanged(object sender, EventArgs e)
-		{
-
-		}
-
-		private void DeleteDataButton_Click(object sender, EventArgs e)
-		{
-			var selectedData = listBoxData.SelectedItem as string;
-
-			if (string.IsNullOrEmpty(selectedData))
-			{
-				MessageBox.Show("Please select an item to delete", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				return;
-			}
-
-			// Split the selected item to extract the Id
-			var idContentParts = selectedData.Split(new[] { " - " }, StringSplitOptions.RemoveEmptyEntries);
-
-			if (idContentParts.Length < 2)
-			{
-				MessageBox.Show("Selected item format is invalid", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				return;
-			}
-
-			//var selectedIdString = idContentParts[0];
-			var selectedNameString = idContentParts[2];
-
-			//if (!int.TryParse(selectedIdString, out int selectedId))
-			//{
-			//	MessageBox.Show("Invalid Id format", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-			//	return;
-			//}
-			if (selectedNameString == null)
-			{
-				MessageBox.Show("Error retrieving unique name", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				return;
-			}
-
-			//var response = DeleteDataById(selectedId);
-			var response = DeleteDataByName(selectedNameString);
-			if (response != null)
-			{
-				listBoxData.Items.Remove(selectedData);
-			}
-		}
-
-
-		private void IdTextBox_TextChanged(object sender, EventArgs e)
-		{
-
-		}
-
 	}
 }

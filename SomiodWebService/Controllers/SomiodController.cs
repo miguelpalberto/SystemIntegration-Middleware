@@ -76,14 +76,20 @@ namespace SomiodWebService.Controllers
 
 			using (var context = new SomiodDbContext())
 			{
-				var uniqueName = application.Name.ToLowerInvariant();
+				if (context.Applications.Any(a => a.Name == application.Name))
+				{
+					return Request.CreateErrorResponse(HttpStatusCode.Conflict, "Application already exists.");
+				}
+
+				//we assumed that if the application already exists then only the subscriptions/data have unique names
+				/*var uniqueName = application.Name.ToLowerInvariant();
 
 				if (context.Applications.Any(a => a.Name == uniqueName))
 				{
 					uniqueName = $"{uniqueName}-{Guid.NewGuid()}";
 				}
 
-				application.Name = uniqueName;
+				application.Name = uniqueName;*/
 				application.CreatedDate = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 				_ = context.Applications.Add(application);
 				_ = context.SaveChanges();
@@ -228,14 +234,20 @@ namespace SomiodWebService.Controllers
 
 				var applicationEntity = queryable.First();
 
-				var uniqueName = container.Name.ToLowerInvariant();
+				if (context.Containers.Any(a => a.Name == container.Name))
+				{
+					return Request.CreateErrorResponse(HttpStatusCode.Conflict, "Application already exists.");
+				}
 
-				if (context.Containers.Any(a => a.Name == uniqueName))
+				//we assumed that if the container already exists then only the subscriptions/data have unique names (instances of the same application and container)
+				/*var uniqueName = container.Name.ToLowerInvariant();
+
+				if (context.Containers.Any(a => a.Name == uniqueName && a.Parent == applicationEntity.Id))
 				{
 					uniqueName = $"{uniqueName}-{Guid.NewGuid()}";
 				}
 
-				container.Name = uniqueName;
+				container.Name = uniqueName;*/
 				container.Parent = applicationEntity.Id;
 				container.CreatedDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 				_ = context.Containers.Add(container);
@@ -245,7 +257,7 @@ namespace SomiodWebService.Controllers
 			}
 		}
 
-		[HttpPut, Route("api/somiod/{application}/containers/{container}")]
+		[HttpPut, Route("api/somiod/{application}/{container}")]
 		public HttpResponseMessage PutContainer(string application, string container, [FromBody] Container updatedContainer)
 		{
 			if (updatedContainer == null)
@@ -285,7 +297,7 @@ namespace SomiodWebService.Controllers
 			}
 		}
 
-		[HttpDelete, Route("api/somiod/{application}/containers/{container}")]
+		[HttpDelete, Route("api/somiod/{application}/{container}")]
 		public HttpResponseMessage DeleteContainer(string application, string container)
 		{
 			using (var context = new SomiodDbContext())
@@ -503,34 +515,6 @@ namespace SomiodWebService.Controllers
 			}
 		}
 
-		[HttpGet, Route("api/somiod/{application}/{container}/data/id/{data}")]
-		public HttpResponseMessage GetDataById(string application, string container, int data)
-		{
-			using (var context = new SomiodDbContext())
-			{
-				var queryable = context.Applications.AsNoTracking().Where(a => a.Name == application).AsQueryable();
-
-				if (!queryable.Any())
-				{
-					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Application not found.");
-				}
-
-				var applicationEntity = queryable.First();
-				var containerEntity = context.Containers.AsNoTracking().Where(c => c.Parent == applicationEntity.Id && c.Name == container).FirstOrDefault();
-
-				if (containerEntity == null)
-				{
-					return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Container not found.");
-				}
-
-				var dataEntity = context.Data.AsNoTracking().Where(d => d.Parent == containerEntity.Id && d.Id == data).FirstOrDefault();
-
-				return dataEntity == null
-					? Request.CreateErrorResponse(HttpStatusCode.NotFound, "Data not found.")
-					: Request.CreateResponse(HttpStatusCode.OK, dataEntity);
-			}
-		}
-
 		[HttpPost, Route("api/somiod/{application}/{container}/data")]
 		public HttpResponseMessage PostData(string application, string container, [FromBody] Data data)
 		{
@@ -618,7 +602,6 @@ namespace SomiodWebService.Controllers
 				return Request.CreateResponse(HttpStatusCode.OK);
 			}
 		}
-
 
 		private void SendNotificationToSubscriptions(SomiodDbContext context, int containerId, string topic, Data data, string eventType)
 		{
